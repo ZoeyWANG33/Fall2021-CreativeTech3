@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF=8">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random artist eggs</title>
+    <div class="avatar" style="--img-url: url(shadeed2.jpg)"></div>
+    <style>
+        img {
+            max-width: 300px;
+        }
+    </style>
+</head>
+
+<body>
+    <button id="startTheProcess"><img src="Chick-icon.png"></button>
+    <section id="cocktailSection"></section>
+    <section id="pictureSection"></section>
+    <section id="musicSection"></section>
+    .avatar {
+        background: var(--img-url) center/cover;
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        box-shadow: inset 0 0 0 2px rgba(#000, 0.1);
+      }
+
+    <script>
+        //Section
+        let cocktailSection = document.getElementById("cocktailSection")
+        let musicSection = document.getElementById("musicSection")
+        let pictureSection = document.getElementById("pictureSection")
+
+        //freesoundApi
+        let freesoundURL = "https://freesound.org/apiv2/search/text/?"
+        let musicapikey = "token=MXLnV4U4q53TStfMtWXFeMZdqyEaTC01oklxCtXb"
+        let musicquery = "query="
+
+        let resultTags = []
+
+        let randomWordGenUrl = "https://random-word-api.herokuapp.com/word?number=1"
+
+        let HarvardMuseumUrl = "https://api.harvardartmuseums.org"
+        let HarvardApiKey = "3bf5e50a-ff1c-477d-b180-9c1d5247a748"
+
+        let cocktailUrl = "https://www.thecocktaildb.com/api/json/v1/1/random.php"
+
+        //lisence to button
+        let triggerButton = document.getElementById("startTheProcess")
+
+        //fuction
+        let triggerHandler = function() {
+            resultTags = []
+            getRandomWord()
+
+        }
+
+        let getRandomWord = function() {
+            fetch(randomWordGenUrl).then((Response) => {
+                //console.info(Response)
+                return Response.json()
+            }).then((data) => {
+                console.info(data)
+
+                //translate json to string
+                let keyword = data.toString()
+
+                //print string in container
+                let nameContainer = document.createElement('h3')
+                nameContainer.innerText = name
+                cocktailSection.appendChild(nameContainer)
+
+                console.info(keyword)
+                searchKeywordInMuseum(keyword)
+                fetchMusic(keyword)
+
+            })
+        }
+
+        let searchKeywordInMuseum = function(keyword) {
+            fetch(HarvardMuseumUrl + "/object?title=" + keyword + "&apikey=" + HarvardApiKey).then((Response) => {
+                //console.info(Response)
+                return Response.json()
+            }).then((data) => {
+                console.info(data)
+                let Thumb = data.records[0].images[0].baseimageurl
+                console.info(Thumb)
+                backgroundPicture(Thumb)
+            })
+        }
+
+        let fetchRandomCocktail = function() {
+            fetch(cocktailUrl).then((Response) => {
+                console.info(Response)
+                return Response.json()
+            }).then((data) => {
+                console.info(data)
+                cockTailDataHandler(data)
+            })
+        }
+
+        let cockTailDataHandler = function(cocktailData) {
+                let name = cocktailData.drinks[0].strDrink
+                let Thumb = cocktailData.drinks[0].strDrinkThumb
+
+                //console.info(name)
+                let nameContainer = document.createElement('h3')
+                nameContainer.innerText = name
+                cocktailSection.appendChild(nameContainer)
+            }
+            //put description of music on the section
+        function musicHundler(musicData, tag) {
+            while (musicSection.firstChild) {
+                musicSection.removeChild(musicSection.firstChild)
+            }
+
+            let nameContainer = document.createElement('h3')
+            nameContainer.innerText = tag
+            musicSection.appendChild(nameContainer)
+        }
+
+        //put picture from Art Museum in picture section
+        function backgroundPicture(image) {
+            while (pictureSection.firstChild) {
+                pictureSection.removeChild(pictureSection.firstChild)
+            }
+
+            let thumbContainer = document.createElement('img')
+            thumbContainer.src = image
+            thumbContainer.alt = name
+            pictureSection.appendChild(thumbContainer)
+        }
+
+
+        function fetchMusic(keyword) {
+            let queryURL = freesoundURL + musicquery + keyword + "&" + musicapikey
+                //console.info(queryURL)
+
+            fetch(queryURL).then((response) => {
+                return response.json()
+            }).then((data) => {
+                musicHundler(data, data.results[0].tags)
+            })
+        }
+
+
+
+        triggerButton.addEventListener('click', triggerHandler)
+    </script>
+</body>
+
+</html>
